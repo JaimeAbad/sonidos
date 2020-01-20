@@ -68,4 +68,20 @@ export class HomePage {
     }
   }
 
+  borrarAnimal(index : number){
+    this.animales.splice(index,1);
+
+  }
+// este metodo sera para que al recargar la pagina refresque y tengamos los animales del ppio
+  recargarAnimales(refresher: any){
+    console.log('Inicio del refresh');
+
+    setTimeout(() => {
+      console.log('Termino el refresh');
+      this.animales = ANIMALES.slice(0);
+
+      refresher.complete();
+    },1500);
+}
+
 }

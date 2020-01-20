@@ -7,10 +7,13 @@
 </ion-header>
 
 <ion-content>
+  <ion-refresher (ionRefresh)="recargarAnimales($event)" slot="fixed">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
 <ion-list>
-  <ion-item-sliding>
-    <ion-item *ngFor="let animal of animales"
-              (click)="reproducir(animal)">
+  <ion-item-sliding *ngFor="let animal of animales">
+    <ion-item (click)="reproducir(animal)">
 
       <ion-avatar item-left>
         <img [src]="animal.imagen">
@@ -22,14 +25,25 @@
       <ion-icon *ngIf="animal.reproduciendo" name="pause" item-right></ion-icon>
     </ion-item>
 
-  <!-- Botones del desplegable -->
-  <ion-item-options side="left">
+    <!-- Botones del desplegable -->
+    <!-- <ion-item-options side="left">
+      <button ion-button color="primary">
+        <ion-icon name="text"></ion-icon>
+        Text
+      </button>
+      <button ion-button color="secondary">
+        <ion-icon name="call"></ion-icon>
+        Call
+      </button>
+    </ion-item-options> -->
 
-  </ion-item-options>
-  <ion-item-options side="right">
 
-  </ion-item-options>
-
+    <ion-item-options side="right">
+      <button ion-button color="danger" (click)="borrarAnimal(i)">
+         <ion-icon name="trash"></ion-icon><!--trash = papelera -->
+        Borrar
+      </button>
+    </ion-item-options>
 
   </ion-item-sliding>
 </ion-list>
