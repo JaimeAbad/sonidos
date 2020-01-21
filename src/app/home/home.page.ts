@@ -84,4 +84,13 @@ export class HomePage {
     },1500);
 }
 
+// reordenarAnimales(eventoOrdenacion: any){
+//   console.log(eventoOrdenacion);
+//
+//   // pasamos animales y los indices que recibimos de la tabla
+//   this.animales = reorderArray(this.animales, eventoOrdenacion);
+//
+// }
+
+
 }
