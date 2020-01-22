@@ -3,48 +3,85 @@
     <ion-title>
       Sounds
     </ion-title>
+    <!--
+      Botón que se activa y desactiva para habilitar o deshabilitar algo, en este caso lo usamos para habilitar y deshabilitar la ordenación.
+      El atributo (ionChange) sirve para que cuando el toggle sufra un cambio, se ejecute el método Update
+    -->
+    <ion-toggle slot="end" color="secondary" (ionChange)="update($event)"></ion-toggle>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-refresher (ionRefresh)="recargarAnimales($event)" slot="fixed">
+  <!--
+    Refresco de la página. Mediante el método desarrollado en el typescript, hacemos que al deslizar hacia abajo refresque la lista de animales.
+  -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" [disabled]=!ordenar >
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-<ion-list reorder="true" (ionItemReorder="reordenarAnimales($event)")>
-  <ion-item-sliding *ngFor="let animal of animales">
-    <ion-item (click)="reproducir(animal)">
+  <ion-list>
+    <ion-reorder-group (ionItemReorder)="doReorder($event)" (ionRefresh)="onRenderItems($event)" [disabled]=ordenar>
+      <!--
+        ion-item-sliding es una etiqueta que sirve para que los elementos de la lista sean deslizables
+        y podamos poner botones a los lados al deslizar. Para trabajar con esta etiqueta deberemos colocar el item
+        dentro, y tener en cuenta que: Los botones de la izquierda deberán programarse ANTES del item, y los botones
+        de la derecha deberán programarse DESPUÉS del item.
+      -->
+      <ion-item-sliding *ngFor="let animal of animales">
+          <!-- El atributo side sirve para poner en qué lado queremos que se sitúen las opciones que estamos programando,
+          en este caso START sirve para que salga a la izquierda -->
+          <ion-item-options side="start">
+            <ion-item-option color="primary">
+               <ion-icon name="add-circle"></ion-icon>
+               <button type="button" (click)="borrarAnimal(animal)" name="button"></button>
+              Añadir
+            </ion-item-option>
+          </ion-item-options>
 
-      <ion-avatar item-left>
-        <img [src]="animal.imagen">
-      </ion-avatar>
+          <!--
+          Elemento de la lista.
+            Con el *ngFor llamamos a la lista y cogemos un animal de la lista AnimalesService
+            Con el click hacemos que al hacerle click, llame al método reproducir de Animal
+          -->
+          <ion-item (click)="reproducir(animal)">
 
-      <h2>{{ animal.nombre }}</h2>
+            <!--
+              La etiqueta ion-avatar se refiere a la imagen que representará al elemento de la lista.
+              Con "item-left" hacemos que se sitúe a la izquierda.
+            -->
+            <ion-avatar item-left>
+              <img [src]="animal.imagen">
+            </ion-avatar>
+            <!--
+              Título que irá en el elemento de la lista
+            -->
+            <h2>{{ animal.nombre }}</h2>
+            <!--
+              Situamos el icono de "play" para que se pueda reproducir el sonido si no se está reproduciendo
+              y el botón de "pause" si sí se está reproduciendo.
+            -->
+            <ion-icon *ngIf=!animal.reproduciendo&&ordenar  name="play" slot=end></ion-icon>
+            <ion-icon *ngIf=animal.reproduciendo&&ordenar name="pause" slot=end></ion-icon>
+            <!--
+            Con la etiqueta ion-reorder hacemos que los elementos sean reordenable. IMPORTANTE: Debe estar dentro de un ion-reorder-group
+            Con el atributo slot, determinamos en qué lado del elemento queremos que salga.
+            -->
+            <ion-reorder slot="end"></ion-reorder>
+          </ion-item>
 
-      <ion-icon *ngIf="!animal.reproduciendo" name="play-circle" item-right></ion-icon>
-      <ion-icon *ngIf="animal.reproduciendo" name="pause" item-right></ion-icon>
-    </ion-item>
+          <!-- El atributo side sirve para poner en qué lado queremos que se sitúen las opciones que estamos programando,
+          en este caso END sirve para que salga a la derecha -->
+          <ion-item-options side="end">
+            <ion-item-option color="danger" (click)="borrarAnimal(animal)" >
+               <ion-icon name="trash"></ion-icon>
+               <button name="button"></button>
+              Borrar
+            </ion-item-option>
+          </ion-item-options>
 
-    <!-- Botones del desplegable -->
-    <!-- <ion-item-options slot="left">
-      <button ion-button color="primary">
-        <ion-icon name="text"></ion-icon>
-        Text
-      </button>
-      <button ion-button color="secondary">
-        <ion-icon name="call"></ion-icon>
-        Call
-      </button>
-    </ion-item-options> -->
+      </ion-item-sliding>
+    </ion-reorder-group>
 
 
-    <ion-item-options slot="right">
-      <button ion-button color="danger" (click)="borrarAnimal(i)">
-         <ion-icon name="trash"></ion-icon><!--trash = papelera -->
-        Borrar
-      </button>
-    </ion-item-options>
-
-  </ion-item-sliding>
-</ion-list>
+  </ion-list>
 </ion-content>

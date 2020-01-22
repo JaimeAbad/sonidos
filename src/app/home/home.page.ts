@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { NavController } from '@ionic/angular';
-import { ANIMALES } from 'src/data.animales';
-import { Animal } from 'src/interfaces/animal.interface';
+
+import { Animal } from '../../interfaces/animal.interface'
+
+import { ANIMALES } from 'src/data/data.animales';
+import { AnimalesService } from '../app/services.service';
 
 @Component({
   selector: 'app-home',
@@ -9,88 +11,108 @@ import { Animal } from 'src/interfaces/animal.interface';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
-  animales: Animal[] = [];
 
-  /*Para tener una unica referencia.
-  **Funcionalidad HTML5
-  */
-  audio = new Audio();
+  //@ViewChild (IonReorderGroup) reorderGroup: IonReorderGroup;
 
-  //Variable para poder controlar el timeout
-  audioTiempo: any;
+  doReorder(ev: any) {
+    // The `from` and `to` properties contain the index of the item
+    // when the drag started and ended, respectively
+    console.log('Desplazando el elemento', ev.detail.from, 'a', ev.detail.to);
 
-
-  constructor(public navCtrl: NavController) {
-    this.animales = ANIMALES.splice(0);
+    // Finish the reorder and position the item in the DOM based on
+    // where the gesture ended. This method can also be called directly
+    // by the reorder group
+    ev.detail.complete();
   }
 
-  reproducir(animal: Animal){
-    this.pausarAudio(animal);
+  /*
+  toggleReorderGroup() {
+    this.reorderGroup.disabled = !this.reorderGroup.disabled;
+  }*/
 
-    if(animal.reproduciendo){
-      animal.reproduciendo = false;
-      return;
+  update(event){
+    let checked:boolean=event.detail.checked;
+
+    if(checked){
+      this.ordenar=false
+    } else {
+      this.ordenar=true
     }
-
-
-    //Reproduccion del sonido
-    // let audio = new Audio(); funcionalidad html
-    this.audio.src = animal.audio;
-
-    //Para que suene
-    this.audio.load();
-    this.audio.play();
-
-    //cambiamos el estado
-    animal.reproduciendo = true;
-
-
-    /*Para controlar que ya se esta reproduciendo el animal y cambiar su estado*/
-    this.audioTiempo = setTimeout(()=> animal.reproduciendo = false, animal.duracion*1000);
   }
 
-  private pausarAudio(animalSeleccionado: Animal){
-    //Limpiamos el timeout
-    clearTimeout(this.audioTiempo);
+  animales: Animal[]=[];
+  ordenar:boolean=true;
 
+  audio=new Audio();
+
+  audioTiempo:any;
+
+  constructor(private animalService: AnimalesService) {
+    this.animales=animalService.getAnimales();
+  }
+
+  borrarAnimal (animal: Animal){
+    console.log('Deleting ' + animal.nombre);
+    //this.animalService.borrarAnimal(animal);
+    this.pausar_audio(animal);
+    var index=this.animales.indexOf(animal);
+    this.animales.splice(index,1);
+  }
+
+  private pausar_audio(animalSeleccionado: Animal){
+    clearTimeout(this.audioTiempo);
     this.audio.pause();
 
-    //Para que se ponga al inicio del audio
-    this.audio.currentTime = 0;
+    this.audio.currentTime=0;
 
-
-    /*Obtenemos nuestro arreglo de animales y poner que ninguno se está
-    reproduciendo a EXCEPCION del animal seleccionado*/
     for(let animal of this.animales){
       if(animal.nombre != animalSeleccionado.nombre){
-        animal.reproduciendo= false;
+        animal.reproduciendo=false;
       }
     }
   }
 
-  borrarAnimal(index : number){
-    this.animales.splice(index,1);
+  reproducir(animal: Animal){
 
+    console.log('Reproduciendo ' + animal);
+
+    this.pausar_audio(animal);
+
+    if(animal.reproduciendo){
+      animal.reproduciendo=false;
+      return;
+
+    }
+
+    this.audio.src=animal.audio;
+
+    this.audio.load();
+    this.audio.play();
+
+    animal.reproduciendo=true;
+
+    setTimeout( ()=> animal.reproduciendo=false, animal.duracion *1000);
   }
-// este metodo sera para que al recargar la pagina refresque y tengamos los animales del ppio
-  recargarAnimales(refresher: any){
-    console.log('Inicio del refresh');
+
+  /*
+
+  */
+  doRefresh(event){
+    console.log('Refreshing...');
 
     setTimeout(() => {
-      console.log('Termino el refresh');
-      this.animales = ANIMALES.slice(0);
+      console.log('Refrescar completado')
+      event.target.complete();
+      this.animales=ANIMALES.slice(0);
+    }, 500);
+  }
 
-      refresher.complete();
-    },1500);
-}
 
-// reordenarAnimales(eventoOrdenacion: any){
-//   console.log(eventoOrdenacion);
-//
-//   // pasamos animales y los indices que recibimos de la tabla
-//   this.animales = reorderArray(this.animales, eventoOrdenacion);
-//
-// }
-
+  onRenderItems(event){
+    console.log('Movinnng');
+    let draggedItem=this.animales.splice(event.detail.from,1)[0];
+    this.animales.splice(event.detail.to,0,draggedItem);
+    event.detail.complete();
+  }
 
 }
